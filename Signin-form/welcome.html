@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="welcome-body">
+  <div class="welcome-container">
+    <div class="welcome-box">
+      <h1 id="welcomeMessage">Welcome, User!</h1>
+      <p class="subtitle">You have successfully logged in 🎉</p>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    // Fetch username from localStorage (you’ll set this in your login JS)
+    const username = localStorage.getItem("loggedInUser");
+
+    // Display username dynamically
+    const welcomeMsg = document.getElementById("welcomeMessage");
+    if (username) {
+      welcomeMsg.textContent = `Welcome, ${username}!`;
+    } else {
+      // If not logged in, redirect to login page
+      window.location.href = "index.html";
+    }
+
+    // Logout functionality
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --muted: #64748b;
+  --text: #0f172a;
+  --accent: #6c5ce7;
+  --accent-2: #3b82f6;
+  --success: #10b981;
+  --danger: #ef4444;
+  --glass: rgba(255,255,255,0.6);
+  --radius: 14px;
+  --shadow-1: 0 6px 18px rgba(19,24,39,0.08);
+  --shadow-2: 0 2px 6px rgba(19,24,39,0.06);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color-scheme: light;
+}
+
+/* Dark theme override class (JS toggles .dark on body or .app) */
+.app.dark {
+  --bg: #0b1020;
+  --card: #0f1724;
+  --muted: #97a0b8;
+  --text: #e6eef8;
+  --accent: #8b5cf6;
+  --accent-2: #60a5fa;
+  --glass: rgba(255,255,255,0.03);
+  --shadow-1: none;
+  --shadow-2: none;
+  background: linear-gradient(180deg, #061226 0%, #081129 100%);
+}
+
+/* Basic reset */
+* {box-sizing: border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-size:16px;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(108,92,231,0.06), transparent),
+              radial-gradient(900px 500px at 90% 90%, rgba(59,130,246,0.04), transparent),
+              var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  /* background-color: #292a2c; */
+}
+
+/* main container */
+.app{
+  width:100%;
+  max-width:920px;
+  min-height:520px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* header */
+.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-icon{ color:var(--accent); }
+.title{
+  margin:0;
+  font-weight:700;
+  font-size:20px;
+  letter-spacing:-0.02em;
+}
+.title .accent{ color:var(--accent-2); }
+
+/* small utilities */
+.btn{
+  background:none;
+  border:0;
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 180ms ease;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.btn.small{ padding:6px 10px; font-size:14px }
+.btn.subtle{
+  color:var(--muted);
+}
+.btn.primary{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:white;
+  box-shadow: 0 6px 20px rgba(99,102,241,0.15);
+}
+.btn.icon{
+  padding:6px;
+  border-radius:8px;
+  font-size:14px;
+}
+.btn:hover{ transform:translateY(-2px) }
+
+/* card */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-1);
+  padding:18px;
+  border:1px solid rgba(15,23,42,0.03);
+}
+
+/* add card */
+.add-card{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* form */
+.todo-form{
+  display:flex;
+  gap:12px;
+}
+.todo-input{
+  flex:1;
+  border:0;
+  padding:14px 16px;
+  border-radius:12px;
+  font-size:15px;
+  outline:none;
+  background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
+  box-shadow:var(--shadow-2);
+  color:var(--text);
+}
+
+/* quick tags */
+.quick-tags{ display:flex; gap:8px; flex-wrap:wrap }
+.tag{
+  padding:8px 10px;
+  background:linear-gradient(180deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03));
+  border-radius:999px;
+  font-size:13px;
+  cursor:pointer;
+  border:1px solid rgba(99,102,241,0.06);
+}
+
+/* todo card list */
+.todo-card{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.todo-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.card-title{ margin:0; font-size:15px; color:var(--muted) }
+.controls{ display:flex; align-items:center; gap:12px; color:var(--muted) }
+
+/* list */
+.todo-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:360px;
+  overflow:auto;
+}
+
+/* item */
+.todo-item{
+  border-radius:12px;
+  padding:10px;
+  transition:all 160ms ease;
+  border:1px solid rgba(15,23,42,0.03);
+  background: linear-gradient(180deg, rgba(0,0,0,0.01), transparent);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.todo-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+}
+.todo-checkbox{
+  width:18px;
+  height:18px;
+  accent-color:var(--accent);
+}
+.todo-text{
+  flex:1;
+  font-size:15px;
+  color:var(--text);
+  word-break:break-word;
+}
+.todo-item[data-completed="true"] .todo-text{
+  text-decoration:line-through;
+  opacity:0.58;
+}
+
+/* small action group on item */
+.item-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.btn-delete{ color:var(--danger) }
+.btn-edit{ color:var(--muted) }
+
+/* footer controls */
+.footer-controls{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:6px;
+}
+.filters{ display:flex; gap:8px; align-items:center }
+.filter{
+  padding:8px 10px;
+  border-radius:8px;
+  font-weight:600;
+  border:1px solid transparent;
+  background:transparent;
+  cursor:pointer;
+}
+.filter.active{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:white;
+  box-shadow:0 8px 24px rgba(99,102,241,0.12);
+}
+
+/* select styling */
+.select{
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid rgba(15,23,42,0.06);
+  background:transparent;
+}
+
+/* tiny accessibility helpers */
+.sr-only{
+  position:absolute;
+  left:-9999px;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
+
+/* empty state */
+.todo-list:empty::before{
+  content: "No tasks yet — add something ✨";
+  display:block;
+  text-align:center;
+  padding:36px 12px;
+  color:var(--muted);
+  font-weight:600;
+}
+
+/* attribution */
+.attribution{
+  text-align:center;
+  color:var(--muted);
+}
+.todo-edit-input {
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.todo-edit-input:focus {
+  box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+}
+
+/* responsiveness */
+@media (max-width:700px){
+  body{ padding:18px }
+  .app{ gap:12px; max-width:680px }
+  .todo-form{ flex-direction:column }
+  .btn.primary{ width:100% }
+  .footer-controls{ flex-direction:column; align-items:flex-start; gap:10px }
+}
