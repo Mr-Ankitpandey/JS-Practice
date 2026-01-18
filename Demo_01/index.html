@@ -5,25 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Application Form</title>
     <script src="script.js" defer></script>
+    <style>
+      table, th, td{
+        border: 1px solid black;
+      }
+    </style>
   </head>
   <body>
     <div>
       <h2>User Form</h2>
       <form action="">
         <label for="name">Name :</label>
-        <input type="text" id="name"/>
-        <br />
-        <br />
-        <label for="age">Age :</label>
-        <input type="text" id="age"/>
+        <input type="text" id="name" name="Name"/>
         <br />
         <br />
         <label for="city">City :</label>
-        <input type="text" id="city"/>
+        <input type="text" id="city" name="City"/>
+        <br />
+        <br />
+        <label for="age">Age :</label>
+        <input type="text" id="age" name="Age"/>
         <br />
         <br />
       </form>
       <button id="saveBtn">Save</button>
+      <div id="btndiv" style="display: none;">
+        <button id="updateBtn">Update</button>
+        <button id="delBtn">Delete</button>
+      </div>
     </div>
 
     <br />
@@ -56,7 +65,7 @@
         <button id="allBtn">All</button>
       </div>
     </div>
-
+    <br>
     <!-- table to display data -->
     <table id="recordsTable"></table>
   </body>
