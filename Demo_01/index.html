@@ -6,33 +6,39 @@
     <title>Application Form</title>
     <script src="script.js" defer></script>
     <style>
-      table, th, td{
+      table,
+      th,
+      td {
         border: 1px solid black;
+      }
+      html {
+        font-family: sans-serif;
       }
     </style>
   </head>
   <body>
     <div>
       <h2>User Form</h2>
-      <form action="">
+      <form id="form" onsubmit="saveBtnHandler(event)">
         <label for="name">Name :</label>
-        <input type="text" id="name" name="Name"/>
+        <input type="text" id="name" name = "Name" pattern="[A-Za-z\s]+"/>
         <br />
         <br />
         <label for="city">City :</label>
-        <input type="text" id="city" name="City"/>
+        <input type="text" id="city" name = "City" pattern="[A-Za-z\s]+"/>
         <br />
         <br />
         <label for="age">Age :</label>
-        <input type="text" id="age" name="Age"/>
+        <input type="number" id="age" name = "Age" min="1"/>
         <br />
         <br />
-      </form>
-      <button id="saveBtn">Save</button>
-      <div id="btndiv" style="display: none;">
-        <button id="updateBtn">Update</button>
-        <button id="delBtn">Delete</button>
+      
+      <button id="saveBtn" type="submit">Save</button>
+      <div id="btndiv" style="display:none;">
+        <button id="updateBtn" type="button" onclick="updateBtnHandler()">Update</button>
+        <button id="delBtn" type="button" onclick="deleteBtnHandler()">Delete</button>
       </div>
+    </form>
     </div>
 
     <br />
@@ -40,7 +46,7 @@
     <!-- Select based on id -->
     <div>
       <label for="selectId">Select based on ID: </label>
-      <select id="selectId">
+      <select id="selectId" onchange="idSelectionHandler()">
         <option value="select-id">Select ID</option>
       </select>
     </div>
@@ -51,7 +57,7 @@
     <div>
       <h2>Filters</h2>
       <label for="selectField">Select Field: </label>
-      <select id="selectField">
+      <select id="selectField" onchange="selectFieldHandler()">
         <option value="select-field">Select Field</option>
       </select>
       <br /><br />
@@ -61,11 +67,12 @@
       </select>
       <br /> <br>
       <div>
-        <button id="filterBtn">Filter</button>
-        <button id="allBtn">All</button>
+        <button id="filterBtn" onclick="filterBtnHandler()">Filter</button>
+        <button id="allBtn" onclick="allBtnHandler()">All</button>
+        <br><br>
       </div>
     </div>
-    <br>
+
     <!-- table to display data -->
     <table id="recordsTable"></table>
   </body>

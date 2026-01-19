@@ -13,9 +13,11 @@ const idSelection = document.getElementById("selectId");
 const selectField = document.getElementById("selectField");
 const selectUnique = document.getElementById("selectUnique");
 const recordsTable = document.getElementById("recordsTable");
+const form = document.getElementById("form");
 
 let records = []; // to store all records data
 let user = {}; // to store each details
+let displayHeadings = true;
 
 // render select options dynamically on select field
 function renderSelectOptions() {
@@ -28,7 +30,7 @@ function renderSelectOptions() {
 }
 renderSelectOptions();
 
-function renderId(user) {
+function renderId() {
   const { id } = user;
   const idOption = document.createElement("option");
   idOption.textContent = id;
@@ -37,33 +39,26 @@ function renderId(user) {
   idSelection.append(idOption);
 }
 
-function displayTable() {
-  //display table headings
-  if (records.length == 1) {
-    const tr = document.createElement("tr");
-    for (let input of formInputs) {
-      const th = document.createElement("th");
-      th.textContent = input.name;
-      tr.append(th);
-    }
-    recordsTable.append(tr);
+function displayTableHeader() {
+  const tr = document.createElement("tr");
+  for (let input of formInputs) {
+    const th = document.createElement("th");
+    th.textContent = input.name;
+    tr.append(th);
   }
+  recordsTable.append(tr);
 }
 
 function renderNewData(user) {
   const { name, city, age } = user;
   const row = document.createElement("tr");
   row.id = user.id;
-  const nameCell = document.createElement("td");
-  nameCell.textContent = name;
-  row.appendChild(nameCell);
-  const cityCell = document.createElement("td");
-  cityCell.textContent = city;
-  row.appendChild(cityCell);
 
-  const ageCell = document.createElement("td");
-  ageCell.textContent = age;
-  row.appendChild(ageCell);
+  row.innerHTML = `
+    <td>${name}</td>
+    <td>${city}</td>
+    <td>${age}</td>
+  `;
   recordsTable.append(row);
 }
 
@@ -71,28 +66,37 @@ function clearValues() {
   formInputs.forEach((input) => (input.value = ""));
 }
 
-const saveBtnHandler = () => {
-  const nameVal = userName.value;
-  const ageVal = userAge.value;
-  const cityVal = userCity.value;
+const saveBtnHandler = (e) => {
+  e.preventDefault();
+  // const nameVal = userName.value;
+  // const ageVal = userAge.value;
+  // const cityVal = userCity.value;
+  // if (nameVal === "" || ageVal === "" || ageVal < 1 || cityVal === "") {
+  //   alert("Please provide valid details !");
+  //   return;
+  // }
+  const formData = new FormData(form);
+  const userData = Object.fromEntries(formData);
 
-  if (nameVal === "" || ageVal === "" || cityVal === "") {
-    alert("Please fill all details !");
-    return;
-  }
-
-  user = {
-    id: Number(new Date()),
-    name: nameVal,
-    age: ageVal,
-    city: cityVal,
-  };
+  if (!userData.Name || !userData.City || !userData.Age || userData.Age < 1) {
+  alert("Please provide valid details!");
+  return;
+}
+user = {
+  id: Number(new Date()),
+  name: userData.Name.trim(),
+  age: userData.Age.trim(),
+  city: userData.City.trim()
+};
   records.push(user);
 
-  displayTable();
-  renderId(user);
+  renderId();
+  if (recordsTable.children.length === 0) {
+    displayTableHeader();
+  }
+
   renderNewData(user);
-  clearValues();
+  form.reset();
 };
 
 const idSelectionHandler = () => {
@@ -109,16 +113,27 @@ const idSelectionHandler = () => {
 };
 
 const updateBtnHandler = () => {
-  const selectedId = idSelection.value;
+  let selectedId = idSelection.value;
   const userDetails = records.find((obj) => obj.id == selectedId);
+
+  const activeField = selectField.value;
+  const activeValue = selectUnique.value;
+
+  const wasMatchingFilter =
+    activeField !== "select-field" &&
+    activeValue !== "select-value" &&
+    userDetails[activeField] == activeValue;
+
+  // update record in array
   records.forEach((obj) => {
     if (obj.id == selectedId) {
-      obj.name = userName.value;
-      obj.city = userCity.value;
-      obj.age = userAge.value;
+      obj.name = userName.value.trim();
+      obj.city = userCity.value.trim();
+      obj.age = userAge.value.trim();
     }
-    console.log(records);
   });
+
+  // update UI table row
   for (let row of recordsTable.children) {
     if (row.id == selectedId) {
       let { name, city, age } = userDetails;
@@ -127,12 +142,29 @@ const updateBtnHandler = () => {
       row.children[2].textContent = age;
     }
   }
+
+  if (wasMatchingFilter) {
+    const newValue = userDetails[activeField];
+
+    // refresh unique dropdown and keep filter applied
+    selectFieldHandler();
+    selectUnique.value = newValue;
+    filterBtnHandler();
+  } else {
+    // no filter action — just refresh unique dropdown (safe)
+    selectFieldHandler();
+  }
+  clearValues();
+  const btndiv = document.querySelector("#btndiv");
+  saveBtn.style.display = "block";
+  btndiv.style.display = "none";
+  idSelection.selectedIndex = 0;
 };
 
 const deleteBtnHandler = () => {
   const selectedId = idSelection.value;
   const indexToDel = records.findIndex((obj) => obj.id == selectedId);
-  records.splice(indexToDel, 1);
+  records.splice(indexToDel, 1); //to delte from array
   for (let node of idSelection.children) {
     if (node.textContent == selectedId) {
       idSelection.removeChild(node);
@@ -144,54 +176,72 @@ const deleteBtnHandler = () => {
       recordsTable.removeChild(row);
     }
   }
-  if (records.length == 0) {
-    saveBtn.style.display = "block";
-    btndiv.style.display = "none";
-    // recordsTable.style.display = "none";
-    return;
+
+  saveBtn.style.display = "block";
+  btndiv.style.display = "none";
+  idSelection.selectedIndex = 0;
+  if (recordsTable.children.length <= 1) {
+    recordsTable.innerHTML = "";
   }
-  selectFieldHandler(); // to live update the unique dropdown if user get deleted
+
+  selectFieldHandler(); // to instant update unique dropdown if any deleteion happens
 };
 const selectFieldHandler = () => {
   const selectedField = selectField.value;
+  const previousValue = selectUnique.value; // store old value
+
+  // reset unique dropdown
   selectUnique.innerHTML = `<option value="select-value">Select Value</option>`;
   if (selectedField === "select-field") return;
 
-  const values = records.map((obj) => obj[selectedField]);
-  console.log(values);
+  // extract field values
+  const values = records.map((obj) => obj[selectedField].trim());
   const uniqueValues = [...new Set(values)];
+
+  // render new unique options
   uniqueValues.forEach((val) => {
     const option = document.createElement("option");
     option.textContent = val;
     option.value = val;
-    selectUnique.appendChild(option);
+    selectUnique.append(option);
   });
-};
-function renderFilteredData(data) {
-  recordsTable.innerHTML = "";
 
-  if (data.length === 0) {
-    return;
+  if (uniqueValues.includes(previousValue)) {
+    selectUnique.value = previousValue;
+  } else {
+    selectUnique.value = "select-value";
   }
-  data.forEach(record => renderNewData(record));
-}
+};
 
 const filterBtnHandler = () => {
-    const selectedField = selectField.value;
-    const selectedValue = selectUnique.value
-    const filteredRecords = records.filter((obj) => obj[selectedField] == selectedValue);
-    renderFilteredData(filteredRecords)
-
+  const selectedField = selectField.value;
+  const selectedValue = selectUnique.value;
+  const filteredRecords = records.filter(
+    (obj) => obj[selectedField] == selectedValue,
+  );
+  if (selectedValue == "select-value") {
+    alert("Please select unique value");
+    return;
+  }
+  if (filteredRecords.length === 0) return;
+  recordsTable.innerHTML = ""; // to remove previous records and only render filtered records
+  displayTableHeader();
+  filteredRecords.forEach((record) => renderNewData(record));
 };
 
 const allBtnHandler = () => {
-  renderFilteredData(records);
+  if(records.length == 0) return
+  selectField.selectedIndex = 0;
+  selectFieldHandler();
+  recordsTable.innerHTML = "";
+  displayTableHeader();
+  records.forEach((record) => renderNewData(record));
 };
 
-saveBtn.addEventListener("click", saveBtnHandler);
-idSelection.addEventListener("change", idSelectionHandler);
-updateBtn.addEventListener("click", updateBtnHandler);
-deleteBtn.addEventListener("click", deleteBtnHandler);
-filterBtn.addEventListener("click", filterBtnHandler);
-selectField.addEventListener("change", selectFieldHandler);
-allBtn.addEventListener("click", allBtnHandler);
+// saveBtn.addEventListener("click", saveBtnHandler);
+// idSelection.addEventListener("change", idSelectionHandler);
+// updateBtn.addEventListener("click", updateBtnHandler);
+// deleteBtn.addEventListener("click", deleteBtnHandler);
+// filterBtn.addEventListener("click", filterBtnHandler);
+// selectField.addEventListener("change", selectFieldHandler);
+// allBtn.addEventListener("click", allBtnHandler);
