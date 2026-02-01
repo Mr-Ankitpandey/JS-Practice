@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mail Demo</title>
+    <script src="script.js" defer></script>
+  </head>
+  <style>
+    table, tr, td{
+        margin-top: 5px;
+        border: 2px solid rgb(83, 81, 81);
+    }thead{
+        font-weight: bold;
+    }
+    tr, td{
+        margin-right: 5px;
+        padding: 2px 12px;
+        /* font-weight: bold; */
+    }
+  </style>
+  <body>
+    <h1>Mail Demo</h1>
+    <section id="userSection">
+      <h2>Users</h2>
+      <form id="userForm" onsubmit="addUser(event)">
+        <input type="text" id="newUserName" placeholder="Enter user name" required/>
+        <input type="submit" value="Add" id="btnAddUser" />
+      </form>
+    </section>
+
+    <section id="composeSection">
+      <h2>Send Form</h2>
+      <form id="composeForm" onsubmit="sendMail(event)">
+        <label for="fromSelect">From:</label>
+        <select id="fromSelect" name="fromSelect">
+          <option value="fromSelect">Select</option>
+        </select>
+        <br />
+        <br />
+        <label for="toSelect">To:</label>
+        <select id="toSelect" name="toSelect">
+          <option value="toSelect">Select</option>
+        </select>
+        <br />
+        <br />
+        <label for="subjectInput">Subject:</label>
+        <input type="text" id="subjectInput" placeholder="Subject" name="subject" required />
+        <br />
+        <br />
+        <label for="messageInput">Message :</label>
+        <textarea id="messageInput" placeholder="Message" name="message"  required></textarea>
+        <br />
+        <input type="submit" value="Send" id="btnSend" />
+      </form>
+    </section>
+
+    <section id="inboxSection">
+        <h2>Check InBox</h2>
+        <label for="">For:</label>
+        <select id="forSelect">
+          <option value="forSelect">Select</option>
+        </select>
+        <table id="inboxTable">
+            <thead>
+                <td>From</td>
+                <td>Subject</td>
+                <td>Message</td>
+                <td>Read/Unread</td>
+                <td>Favourite</td>
+            </thead>
+        </table>
+    </section>
+
+    <section id="favSection">
+        <h2>Favourite Email List</h2>
+        <table id="favTable"></table>
+    </section>
+  </body>
+</html>

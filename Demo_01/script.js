@@ -1,108 +1,107 @@
-const saveBtn = document.getElementById("saveBtn");
-const filterBtn = document.getElementById("filterBtn");
-const allBtn = document.getElementById("allBtn");
-const updateBtn = document.getElementById("updateBtn");
-const deleteBtn = document.getElementById("delBtn");
-
-const formInputs = document.querySelectorAll("input");
-
-const userName = document.getElementById("name");
-const userAge = document.getElementById("age");
-const userCity = document.getElementById("city");
-const idSelection = document.getElementById("selectId");
-const selectField = document.getElementById("selectField");
-const selectUnique = document.getElementById("selectUnique");
-const recordsTable = document.getElementById("recordsTable");
-const form = document.getElementById("form");
-
-let records = []; // to store all records data
-let user = {}; // to store each details
-let displayHeadings = true;
-
-// render select options dynamically on select field
-function renderSelectOptions() {
+let filteredRecords = []
+const renderSelectOptions = () => {
   for (let input of formInputs) {
     const optionVal = document.createElement("option");
     optionVal.textContent = input.name;
     optionVal.value = input.name.toLowerCase();
-    selectField.append(optionVal);
+    selectField?.append(optionVal);
   }
-}
+};
 renderSelectOptions();
 
-function renderId() {
+const renderId = () => {
   const { id } = user;
-  const idOption = document.createElement("option");
+  const idOption = document?.createElement("option");
   idOption.textContent = id;
   idOption.id = id;
   idOption.value = id;
-  idSelection.append(idOption);
-}
+  idSelection?.append(idOption);
+};
 
-function displayTableHeader() {
+const displayTableHeader = () => {
   const tr = document.createElement("tr");
   for (let input of formInputs) {
     const th = document.createElement("th");
     th.textContent = input.name;
     tr.append(th);
   }
-  recordsTable.append(tr);
-}
+  recordsTable?.append(tr);
+};
 
-function renderNewData(user) {
+const renderNewData = (user, selectedValue) => {
   const { name, city, age } = user;
   const row = document.createElement("tr");
-  row.id = user.id;
+  row.id = user?.id;
 
   row.innerHTML = `
     <td>${name}</td>
     <td>${city}</td>
     <td>${age}</td>
   `;
-  recordsTable.append(row);
-}
-
-function clearValues() {
+  console.log(selectedValue);
+  recordsTable?.append(row);
+};
+const clearValues = () => {
   formInputs.forEach((input) => (input.value = ""));
-}
+};
 
 const saveBtnHandler = (e) => {
   e.preventDefault();
-  // const nameVal = userName.value;
-  // const ageVal = userAge.value;
-  // const cityVal = userCity.value;
-  // if (nameVal === "" || ageVal === "" || ageVal < 1 || cityVal === "") {
-  //   alert("Please provide valid details !");
-  //   return;
-  // }
-  const formData = new FormData(form);
+  let formData;
+  try {
+    formData = new FormData(form);
+  } catch (error) {
+    console.error("Form Data not found");
+    return;
+  }
   const userData = Object.fromEntries(formData);
+  if (!isNaN(Number(userData.Name)) || !isNaN(Number(userData.City))) {
+    alert("Please provide valid details!");
+    return;
+  }
 
   if (!userData.Name || !userData.City || !userData.Age || userData.Age < 1) {
-  alert("Please provide valid details!");
-  return;
-}
-user = {
-  id: Number(new Date()),
-  name: userData.Name.trim(),
-  age: userData.Age.trim(),
-  city: userData.City.trim()
-};
+    alert("Please provide valid details!");
+    return;
+  }
+  user = {
+    id: Number(new Date()),
+    name: userData.Name.trim(),
+    age: userData.Age.trim(),
+    city: userData.City.trim(),
+  };
   records.push(user);
-
   renderId();
-  if (recordsTable.children.length === 0) {
+  if (recordsTable?.children.length === 0) {
     displayTableHeader();
   }
 
-  renderNewData(user);
   form.reset();
+  selectFieldHandler();
+  const selectedValue = selectUnique?.value;
+  console.log(records, userData.Age, userData.City, selectedValue);
+  if (selectedValue == "select-value") {
+    // allBtnHandler();
+  }
+  if(userData.Name == selectedValue || userData.Age == selectedValue || userData.City == selectedValue){
+    filteredRecords.push(user)
+    filterBtnHandler()
+  } 
+  isFilter ? "" : renderNewData(user);
+
+
 };
 
 const idSelectionHandler = () => {
-  const selectedId = idSelection.value;
+  const selectedId = idSelection?.value;
   if (selectedId === "select-id") return;
-  const userDetails = records.find((obj) => obj.id == selectedId);
+  let userDetails;
+  try {
+    userDetails = records.find((obj) => obj.id == selectedId);
+  } catch (error) {
+    console.error("Details not found", error);
+    return;
+  }
   userName.value = userDetails.name;
   userCity.value = userDetails.city;
   userAge.value = userDetails.age;
@@ -112,29 +111,33 @@ const idSelectionHandler = () => {
   btndiv.style.display = "block";
 };
 
-const updateBtnHandler = () => {
-  let selectedId = idSelection.value;
-  const userDetails = records.find((obj) => obj.id == selectedId);
+const updateBtnHandler = (event) => {
+  event.preventDefault();
+  let selectedId = idSelection?.value;
+  let userDetails;
+  try {
+    userDetails = records.find((obj) => obj.id == selectedId);
+  } catch (error) {
+    console.log("Records not found", error);
+  }
 
-  const activeField = selectField.value;
-  const activeValue = selectUnique.value;
+  const activeField = selectField?.value;
+  const activeValue = selectUnique?.value;
 
   const wasMatchingFilter =
     activeField !== "select-field" &&
     activeValue !== "select-value" &&
     userDetails[activeField] == activeValue;
 
-  // update record in array
   records.forEach((obj) => {
     if (obj.id == selectedId) {
-      obj.name = userName.value.trim();
-      obj.city = userCity.value.trim();
-      obj.age = userAge.value.trim();
+      obj.name = userName?.value.trim();
+      obj.city = userCity?.value.trim();
+      obj.age = userAge?.value.trim();
     }
   });
 
-  // update UI table row
-  for (let row of recordsTable.children) {
+  for (let row of recordsTable?.children) {
     if (row.id == selectedId) {
       let { name, city, age } = userDetails;
       row.children[0].textContent = name;
@@ -144,14 +147,11 @@ const updateBtnHandler = () => {
   }
 
   if (wasMatchingFilter) {
-    const newValue = userDetails[activeField];
-
-    // refresh unique dropdown and keep filter applied
+    // const newValue = userDetails[activeField];
     selectFieldHandler();
-    selectUnique.value = newValue;
+    // selectUnique.value = newValue;
     filterBtnHandler();
   } else {
-    // no filter action — just refresh unique dropdown (safe)
     selectFieldHandler();
   }
   clearValues();
@@ -163,15 +163,20 @@ const updateBtnHandler = () => {
 
 const deleteBtnHandler = () => {
   const selectedId = idSelection.value;
-  const indexToDel = records.findIndex((obj) => obj.id == selectedId);
-  records.splice(indexToDel, 1); //to delte from array
-  for (let node of idSelection.children) {
+  let indexToDel;
+  try {
+    indexToDel = records.findIndex((obj) => obj.id == selectedId);
+  } catch (error) {
+    console.error("Index not found");
+  }
+  records?.splice(indexToDel, 1); //to delte from array
+  for (let node of idSelection?.children) {
     if (node.textContent == selectedId) {
       idSelection.removeChild(node);
       clearValues();
     }
   }
-  for (let row of recordsTable.children) {
+  for (let row of recordsTable?.children) {
     if (row.id == selectedId) {
       recordsTable.removeChild(row);
     }
@@ -180,57 +185,17 @@ const deleteBtnHandler = () => {
   saveBtn.style.display = "block";
   btndiv.style.display = "none";
   idSelection.selectedIndex = 0;
-  if (recordsTable.children.length <= 1) {
+  if (recordsTable?.children.length <= 1) {
     recordsTable.innerHTML = "";
   }
 
-  selectFieldHandler(); // to instant update unique dropdown if any deleteion happens
-};
-const selectFieldHandler = () => {
-  const selectedField = selectField.value;
-  const previousValue = selectUnique.value; // store old value
-
-  // reset unique dropdown
-  selectUnique.innerHTML = `<option value="select-value">Select Value</option>`;
-  if (selectedField === "select-field") return;
-
-  // extract field values
-  const values = records.map((obj) => obj[selectedField].trim());
-  const uniqueValues = [...new Set(values)];
-
-  // render new unique options
-  uniqueValues.forEach((val) => {
-    const option = document.createElement("option");
-    option.textContent = val;
-    option.value = val;
-    selectUnique.append(option);
-  });
-
-  if (uniqueValues.includes(previousValue)) {
-    selectUnique.value = previousValue;
-  } else {
-    selectUnique.value = "select-value";
-  }
-};
-
-const filterBtnHandler = () => {
-  const selectedField = selectField.value;
-  const selectedValue = selectUnique.value;
-  const filteredRecords = records.filter(
-    (obj) => obj[selectedField] == selectedValue,
-  );
-  if (selectedValue == "select-value") {
-    alert("Please select unique value");
-    return;
-  }
-  if (filteredRecords.length === 0) return;
-  recordsTable.innerHTML = ""; // to remove previous records and only render filtered records
-  displayTableHeader();
-  filteredRecords.forEach((record) => renderNewData(record));
+  selectFieldHandler();
 };
 
 const allBtnHandler = () => {
-  if(records.length == 0) return
+  isFilter = false
+  isAllButtonClicked = true;
+  if (records.length == 0) return;
   selectField.selectedIndex = 0;
   selectFieldHandler();
   recordsTable.innerHTML = "";
@@ -238,10 +203,54 @@ const allBtnHandler = () => {
   records.forEach((record) => renderNewData(record));
 };
 
-// saveBtn.addEventListener("click", saveBtnHandler);
-// idSelection.addEventListener("change", idSelectionHandler);
-// updateBtn.addEventListener("click", updateBtnHandler);
-// deleteBtn.addEventListener("click", deleteBtnHandler);
-// filterBtn.addEventListener("click", filterBtnHandler);
-// selectField.addEventListener("change", selectFieldHandler);
-// allBtn.addEventListener("click", allBtnHandler);
+const selectFieldHandler = () => {
+  const selectedField = selectField.value;
+  const previousValue = selectUnique.value; // store old value
+
+  selectUnique.innerHTML = `<option value="select-value">Select Value</option>`;
+  if (selectedField === "select-field") return;
+
+  const values = records?.map((obj) => obj[selectedField].trim().toLowerCase());
+  const uniqueValues = [...new Set(values)];
+
+  uniqueValues?.forEach((val) => {
+    const option = document.createElement("option");
+    option.textContent = val;
+    option.value = val;
+    selectUnique?.append(option);
+  });
+
+  if (uniqueValues.includes(previousValue)) {
+    selectUnique.value = previousValue;
+  } 
+};
+
+const filterBtnHandler = () => {
+  
+  const selectedField = selectField?.value;
+  const selectedValue = selectUnique?.value;
+  if (selectedValue == "select-value") {
+    allBtnHandler();
+    
+  }else if (!isAllButtonClicked) recordsTable.innerHTML = "";
+  
+  // if(selectedField == "select-field" && selectedValue == "select-value") alert("Chose Filter")
+
+  try {
+    filteredRecords = records.filter(
+      (obj) => obj[selectedField].toLowerCase() == selectedValue,
+    );
+  } catch (error) {
+    console.log("Filtered records not found");
+    return;
+  }
+  if (filteredRecords.length === 0) return;
+  recordsTable.innerHTML = "";
+  displayTableHeader();
+  isFilter = true;
+  filteredRecords.forEach((record) => renderNewData(record, isFilter));
+  if (selectedValue == "select-value") {
+    alert("Please select unique value");
+    return;
+  }
+};

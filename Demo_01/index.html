@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Application Form</title>
+    <script src="declarations.js" defer></script>
     <script src="script.js" defer></script>
     <style>
       table,
@@ -21,11 +22,11 @@
       <h2>User Form</h2>
       <form id="form" onsubmit="saveBtnHandler(event)">
         <label for="name">Name :</label>
-        <input type="text" id="name" name = "Name" pattern="[A-Za-z\s]+"/>
+        <input type="text" id="name" name = "Name"   />
         <br />
         <br />
         <label for="city">City :</label>
-        <input type="text" id="city" name = "City" pattern="[A-Za-z\s]+"/>
+        <input type="text" id="city" name = "City"/>
         <br />
         <br />
         <label for="age">Age :</label>
@@ -35,7 +36,7 @@
       
       <button id="saveBtn" type="submit">Save</button>
       <div id="btndiv" style="display:none;">
-        <button id="updateBtn" type="button" onclick="updateBtnHandler()">Update</button>
+        <button id="updateBtn" type="submit" onclick="updateBtnHandler(event)">Update</button>
         <button id="delBtn" type="button" onclick="deleteBtnHandler()">Delete</button>
       </div>
     </form>
@@ -57,7 +58,7 @@
     <div>
       <h2>Filters</h2>
       <label for="selectField">Select Field: </label>
-      <select id="selectField" onchange="selectFieldHandler()">
+      <select id="selectField" onchange="selectFieldHandler(event)">
         <option value="select-field">Select Field</option>
       </select>
       <br /><br />
