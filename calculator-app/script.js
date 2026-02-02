@@ -1,258 +1,246 @@
-// --- State and Storage Helpers ---
+// ==============================
+// STATE & STORAGE HELPERS
+// ==============================
 
 function getUsers() {
-    return JSON.parse(localStorage.getItem('mailApp_users') || '[]');
+  return JSON.parse(localStorage.getItem('mailApp_users') || '[]');
 }
 
 function saveUser(name) {
-    const users = getUsers();
-    if (!users.includes(name)) {
-        users.push(name);
-        localStorage.setItem('mailApp_users', JSON.stringify(users));
-        return true;
-    }
-    return false;
+  const users = getUsers();
+  if (!users.includes(name)) {
+    users.push(name);
+    localStorage.setItem('mailApp_users', JSON.stringify(users));
+    return true;
+  }
+  return false;
 }
 
 function getMails() {
-    return JSON.parse(localStorage.getItem('mailApp_mails') || '[]');
+  return JSON.parse(localStorage.getItem('mailApp_mails') || '[]');
 }
 
 function saveMail(mail) {
-    const mails = getMails();
-    mails.push(mail);
-    localStorage.setItem('mailApp_mails', JSON.stringify(mails));
+  const mails = getMails();
+  mails.push(mail);
+  localStorage.setItem('mailApp_mails', JSON.stringify(mails));
 }
 
 function updateMailReadStatus(id, isRead) {
-    const mails = getMails();
-    const mail = mails.find(m => m.id === id);
-    if (mail) {
-        mail.isRead = isRead;
-        localStorage.setItem('mailApp_mails', JSON.stringify(mails));
-    }
+  const mails = getMails();
+  const mail = mails.find(m => m.id === id);
+  if (mail) {
+    mail.isRead = isRead;
+    localStorage.setItem('mailApp_mails', JSON.stringify(mails));
+  }
 }
 
 function getFavorites() {
-    return JSON.parse(sessionStorage.getItem('mailApp_favorites') || '[]');
+  return JSON.parse(sessionStorage.getItem('mailApp_favorites') || '[]');
 }
 
 function addFavorite(id) {
-    const favs = getFavorites();
-    if (!favs.includes(id)) {
-        favs.push(id);
-        sessionStorage.setItem('mailApp_favorites', JSON.stringify(favs));
-    }
+  const favs = getFavorites();
+  if (!favs.includes(id)) {
+    favs.push(id);
+    sessionStorage.setItem('mailApp_favorites', JSON.stringify(favs));
+  }
 }
 
 function removeFavorite(id) {
-    let favs = getFavorites();
-    favs = favs.filter(favId => favId !== id);
-    sessionStorage.setItem('mailApp_favorites', JSON.stringify(favs));
+  const favs = getFavorites().filter(fid => fid !== id);
+  sessionStorage.setItem('mailApp_favorites', JSON.stringify(favs));
 }
 
-// --- UI Helpers ---
+// ==============================
+// ASYNC RANDOM PROMISE WITH LOADER
+// ==============================
+
+function randomDecisionWithLoader() {
+  const loader = document.getElementById('loadingMsg');
+  loader.style.display = 'block';
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      fetch('https://yesno.wtf/api')
+        .then(res => res.json())
+        .then(data => {
+          loader.style.display = 'none';
+          data.answer === 'yes'
+            ? resolve()
+            : reject('Action rejected by system');
+        })
+        .catch(() => {
+          loader.style.display = 'none';
+          reject('Network error');
+        });
+    }, 1200); // artificial delay
+  });
+}
+
+// ==============================
+// UI HELPERS
+// ==============================
 
 function populateSelects() {
-    const users = getUsers();
-    const fromSelect = document.getElementById('fromSelect');
-    const toSelect = document.getElementById('toSelect');
-    const forSelect = document.getElementById('forSelect');
+  const users = getUsers();
+  const fromSelect = document.getElementById('fromSelect');
+  const toSelect = document.getElementById('toSelect');
+  const forSelect = document.getElementById('forSelect');
 
-    // Helper to generic populate
-    const updateOptions = (selectElement, excludeUser = null) => {
-        const currentVal = selectElement.value;
-        // Keep the first "Select" option
-        selectElement.innerHTML = `<option value="${selectElement.id}">Select</option>`;
-        
-        users.forEach(user => {
-            if (user !== excludeUser) {
-                const option = document.createElement('option');
-                option.value = user;
-                option.textContent = user;
-                selectElement.appendChild(option);
-            }
-        });
+  function updateOptions(select, exclude = null) {
+    const prev = select.value;
+    select.innerHTML = `<option value="${select.id}">Select</option>`;
 
-        // Try to restore value
-        if (currentVal && users.includes(currentVal) && currentVal !== excludeUser) {
-            selectElement.value = currentVal;
-        }
-    };
+    users.forEach(user => {
+      if (user !== exclude) {
+        const opt = document.createElement('option');
+        opt.value = user;
+        opt.textContent = user;
+        select.appendChild(opt);
+      }
+    });
 
-    updateOptions(fromSelect);
-    updateOptions(forSelect);
-    
-    // Logic for To Select (exclude From)
-    const selectedFrom = fromSelect.value;
-    const realSelectedFrom = (selectedFrom !== 'fromSelect') ? selectedFrom : null;
-    updateOptions(toSelect, realSelectedFrom);
+    if (users.includes(prev)) select.value = prev;
+  }
+
+  updateOptions(fromSelect);
+  updateOptions(forSelect);
+
+  const fromUser = fromSelect.value !== 'fromSelect' ? fromSelect.value : null;
+  updateOptions(toSelect, fromUser);
 }
 
 function createRow(mail, isInbox) {
-    const tr = document.createElement('tr');
-    
-    // Bold if unread
-    tr.style.fontWeight = mail.isRead ? 'normal' : 'bold';
+  const tr = document.createElement('tr');
+  tr.style.fontWeight = mail.isRead ? 'normal' : 'bold';
 
-    // From
-    const tdFrom = document.createElement('td');
-    tdFrom.textContent = mail.from;
-    tr.appendChild(tdFrom);
+  ['from', 'subject', 'message'].forEach(key => {
+    const td = document.createElement('td');
+    td.textContent = mail[key];
+    tr.appendChild(td);
+  });
 
-    // Subject
-    const tdSubject = document.createElement('td');
-    tdSubject.textContent = mail.subject;
-    tr.appendChild(tdSubject);
-
-    // Message
-    const tdMessage = document.createElement('td');
-    tdMessage.textContent = mail.message;
-    tr.appendChild(tdMessage);
-
-    // Read/Unread Button Logic
-    const tdRead = document.createElement('td');
-    const btnRead = document.createElement('button');
-    // Button text: if read -> 'Unread', if unread -> 'Read'
-    btnRead.textContent = mail.isRead ? 'Unread' : 'Read';
-    btnRead.onclick = () => {
-        // Toggle status: true -> false, false -> true
+  // Read / Unread
+  const tdRead = document.createElement('td');
+  const btnRead = document.createElement('button');
+  btnRead.textContent = mail.isRead ? 'Unread' : 'Read';
+  btnRead.onclick = () => {
+    randomDecisionWithLoader()
+      .then(() => {
         updateMailReadStatus(mail.id, !mail.isRead);
         renderTables();
-    };
-    tdRead.appendChild(btnRead);
-    tr.appendChild(tdRead);
+      })
+      .catch(alert);
+  };
+  tdRead.appendChild(btnRead);
+  tr.appendChild(tdRead);
 
-    // Fav/Unfav
-    const tdFav = document.createElement('td');
-    const btnFav = document.createElement('button');
-    if (isInbox) {
-        btnFav.textContent = 'Favourite';
-        btnFav.onclick = () => {
-            addFavorite(mail.id);
-            renderTables();
-        };
-    } else {
-        btnFav.textContent = 'Unfavourite';
-        btnFav.onclick = () => {
-            removeFavorite(mail.id);
-            renderTables();
-        };
-    }
-    tdFav.appendChild(btnFav);
-    tr.appendChild(tdFav);
+  // Favourite / Unfavourite
+  const tdFav = document.createElement('td');
+  const btnFav = document.createElement('button');
+  btnFav.textContent = isInbox ? 'Favourite' : 'Unfavourite';
+  btnFav.onclick = () => {
+    randomDecisionWithLoader()
+      .then(() => {
+        isInbox ? addFavorite(mail.id) : removeFavorite(mail.id);
+        renderTables();
+      })
+      .catch(alert);
+  };
+  tdFav.appendChild(btnFav);
+  tr.appendChild(tdFav);
 
-    return tr;
+  return tr;
 }
 
 function renderTables() {
-    const currentUser = document.getElementById('forSelect').value;
-    // Check if a valid user is selected (ignore default 'forSelect' value)
-    if (currentUser === 'forSelect') {
-         // Optionally clear tables if no user selected
-         // But we should clean up the tables appropriately regardless
-    }
+  const currentUser = document.getElementById('forSelect').value;
+  const inboxTable = document.getElementById('inboxTable');
+  const favTable = document.getElementById('favTable');
 
-    const allMails = getMails();
-    const favIds = getFavorites();
-    const userMails = allMails.filter(m => m.to === currentUser);
+  while (inboxTable.rows.length > 1) inboxTable.deleteRow(1);
+  favTable.innerHTML = `
+    <tr>
+      <td>From</td>
+      <td>Subject</td>
+      <td>Message</td>
+      <td>Read/Unread</td>
+      <td>Unfavourite</td>
+    </tr>
+  `;
 
-    // Inbox Table
-    const inboxTable = document.getElementById('inboxTable');
-    // Keep header (row 0), remove others
-    while (inboxTable.rows.length > 1) {
-        inboxTable.deleteRow(1);
-    }
-    
-    // Fav Table
-    const favTable = document.getElementById('favTable');
-    favTable.innerHTML = ''; // Clear completely
-    // Re-add Header for Fav Table
-    const favHeader = document.createElement('tr');
-    favHeader.innerHTML = `
-        <td>From</td>
-        <td>Subject</td>
-        <td>Message</td>
-        <td>Read/Unread</td>
-        <td>Unfavourite</td>
-    `;
-    favTable.appendChild(favHeader);
+  if (currentUser === 'forSelect') return;
 
+  const mails = getMails().filter(m => m.to === currentUser);
+  const favIds = getFavorites();
 
-    if (currentUser !== 'forSelect') {
-        userMails.forEach(mail => {
-            const isFav = favIds.includes(mail.id);
-            if (isFav) {
-                const row = createRow(mail, false);
-                favTable.appendChild(row);
-            } else {
-                const row = createRow(mail, true);
-                inboxTable.appendChild(row);
-            }
-        });
-    }
+  mails.forEach(mail => {
+    const row = createRow(mail, !favIds.includes(mail.id));
+    favIds.includes(mail.id)
+      ? favTable.appendChild(row)
+      : inboxTable.appendChild(row);
+  });
 }
 
-// --- Event Handlers matching HTML ---
+// ==============================
+// EVENT HANDLERS
+// ==============================
 
-// Global addUser for onsubmit="addUser(event)"
-window.addUser = function(event) {
-    event.preventDefault();
-    const nameInput = document.getElementById('newUserName');
-    const name = nameInput.value.trim();
-    if (name) {
-        if (saveUser(name)) {
-            populateSelects();
-            nameInput.value = '';
-        } else {
-            alert('User already exists!');
-        }
-    }
+window.addUser = function (e) {
+  e.preventDefault();
+  const input = document.getElementById('newUserName');
+  const name = input.value.trim();
+  if (!name) return;
+
+  randomDecisionWithLoader()
+    .then(() => {
+      if (saveUser(name)) {
+        populateSelects();
+        input.value = '';
+      } else {
+        alert('User already exists');
+      }
+    })
+    .catch(alert);
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initial Render
-    populateSelects();
-    renderTables();
+  populateSelects();
+  renderTables();
 
-    // Listeners
-    document.getElementById('fromSelect').addEventListener('change', populateSelects);
-    document.getElementById('forSelect').addEventListener('change', renderTables);
+  document.getElementById('fromSelect').addEventListener('change', populateSelects);
+  document.getElementById('forSelect').addEventListener('change', renderTables);
 
-    // Send Form Submission
-    const composeForm = document.getElementById('composeForm');
-    composeForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        
-        const fromVal = document.getElementById('fromSelect').value;
-        const toVal = document.getElementById('toSelect').value;
-        const subject = document.getElementById('subjectInput').value;
-        const message = document.getElementById('messageInput').value;
+  document.getElementById('composeForm').addEventListener('submit', e => {
+    e.preventDefault();
 
-        if (fromVal === 'fromSelect' || toVal === 'toSelect') {
-            alert('Please select valid From and To users.');
-            return;
-        }
+    const from = fromSelect.value;
+    const to = toSelect.value;
+    const subject = subjectInput.value;
+    const message = messageInput.value;
 
-        const newMail = {
-            id: Date.now().toString(),
-            from: fromVal,
-            to: toVal,
-            subject,
-            message,
-            isRead: false
-        };
+    if (from === 'fromSelect' || to === 'toSelect') {
+      alert('Please select valid users');
+      return;
+    }
 
-        saveMail(newMail);
-        
-        // Reset form
-        document.getElementById('subjectInput').value = '';
-        document.getElementById('messageInput').value = '';
-        
-        // Update view if needed
-        const currentFor = document.getElementById('forSelect').value;
-        if (currentFor === toVal) {
-            renderTables();
-        }
-    });
+    const mail = {
+      id: Date.now().toString(),
+      from,
+      to,
+      subject,
+      message,
+      isRead: false
+    };
+
+    randomDecisionWithLoader()
+      .then(() => {
+        saveMail(mail);
+        subjectInput.value = '';
+        messageInput.value = '';
+        if (forSelect.value === to) renderTables();
+      })
+      .catch(alert);
+  });
 });
