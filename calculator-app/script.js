@@ -52,9 +52,6 @@ function removeFavorite(id) {
   sessionStorage.setItem('mailApp_favorites', JSON.stringify(favs));
 }
 
-// ==============================
-// ASYNC RANDOM PROMISE WITH LOADER
-// ==============================
 
 function randomDecisionWithLoader() {
   const loader = document.getElementById('loadingMsg');

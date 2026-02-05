@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mail Demo</title>
+    <link
+      href="https://cdn.jsdelivr.net/combine/npm/daisyui@5/components/loading.css,npm/daisyui@5/theme/light.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" type = "module"></script>
+  </head>
+  <body>
+    <h1>Mail Demo</h1>
+    <section id="userSection">
+      <h2>Users</h2>
+      <form id="userForm">
+        <input
+          type="text"
+          id="newUserName"
+          placeholder="Enter user name"
+          required
+        />
+        <input type="submit" value="Add" id="btnAddUser" />
+      </form>
+    </section>
+
+    <section id="composeSection">
+      <h2>Send Form</h2>
+      <form id="composeForm">
+        <label for="fromSelect">From:</label>
+        <select id="fromSelect" name="fromSelect">
+          <option value="fromSelect">Select</option>
+        </select>
+        <br />
+        <br />
+        <label for="toSelect">To:</label>
+        <select id="toSelect" name="toSelect">
+          <option value="toSelect">Select</option>
+        </select>
+        <br />
+        <br />
+        <label for="subjectInput">Subject:</label>
+        <input
+          type="text"
+          id="subjectInput"
+          placeholder="Subject"
+          name="subject"
+          required
+        />
+        <br />
+        <br />
+        <label for="messageInput">Message :</label>
+        <textarea
+          id="messageInput"
+          placeholder="Message"
+          name="message"
+          required
+        ></textarea>
+        <br />
+        <input type="submit" value="Send" id="btnSend" />
+      </form>
+    </section>
+
+    <section id="inboxSection">
+      <h2>Check InBox</h2>
+      <label for="">For:</label>
+      <select id="forSelect">
+        <option value="forSelect">Select</option>
+      </select>
+      <table id="inboxTable">
+        <thead>
+          <td>From</td>
+          <td>Subject</td>
+          <td>Message</td>
+          <td>Read/Unread</td>
+          <td>Favourite</td>
+        </thead>
+      </table>
+    </section>
+
+    <section id="favSection">
+      <h2>Favourite Email List</h2>
+      <table id="favTable"></table>
+    </section>
+
+    <div id="loader">
+      Please Wait... <span class="loading loading-spinner loading-xl"></span>
+    </div>
+  </body>
+</html>
